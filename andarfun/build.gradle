@@ -20,4 +20,21 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:+'
+    compile files('lib/AndAR.jar')
 }
+
+task copyNativeLibs(type: Copy) {
+    from(new File('lib-native')) { include '**' }
+    into new File(buildDir, 'lib-native')
+}
+
+tasks.withType(Compile) {
+    compileTask -> compileTask.dependsOn copyNativeLibs
+}
+
+tasks.withType(com.android.build.gradle.tasks.PackageApplication) {
+    pkgTask -> pkgTask.jniFolders = new HashSet<File>()
+    pkgTask.jniFolders.add(new File(projectDir, 'lib-native'))
+}
+
+clean.dependsOn 'cleanCopyNativeLibs'
